@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-green-100 flex justify-center items-center min-h-screen p-5">
+
+    <div class="w-full max-w-6xl">
+        <h1 class="text-3xl font-bold text-gray-700 mb-8">Your Profile</h1>
+
+        <!-- Plant Selection Dropdown -->
+        <div class="bg-white p-6 rounded-xl shadow-lg mb-8">
+            <h2 class="text-2xl font-bold text-gray-700 mb-4">Select a Plant</h2>
+            <select id="plantSelect" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-green-400">
+                <option value="">Select a plant</option>
+                {% for plant in plants %}
+                <option value="{{ plant.plant_id }}">{{ plant.plant_name }} (ID: {{ plant.plant_id }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Graphs Section -->
+        <div class="bg-white p-6 rounded-xl shadow-lg mb-8">
+            <h2 class="text-2xl font-bold text-gray-700 mb-4">Dynamic Graphs</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- NPK Graph -->
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">NPK Values Over Time</h3>
+                    <canvas id="npkChart"></canvas>
+                </div>
+                <!-- Temperature and Humidity Graph -->
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Temperature & Humidity Over Time</h3>
+                    <canvas id="tempHumidityChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registered Plants Section -->
+        <div class="bg-white p-6 rounded-xl shadow-lg mb-8">
+            <h2 class="text-2xl font-bold text-gray-700 mb-4">Your Registered Plants</h2>
+            <table class="w-full">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="p-2">Plant ID</th>
+                        <th class="p-2">Plant Name</th>
+                        <th class="p-2">Temperature (°C)</th>
+                        <th class="p-2">Humidity (%)</th>
+                        <th class="p-2">N</th>
+                        <th class="p-2">P</th>
+                        <th class="p-2">K</th>
+                        <th class="p-2">Date Registered</th>
+                        <th class="p-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for plant in plants %}
+                    <tr class="border-b">
+                        <td class="p-2 text-center">{{ plant.plant_id }}</td>
+                        <td class="p-2 text-center">{{ plant.plant_name }}</td>
+                        <td class="p-2 text-center">{{ plant.temperature }}</td>
+                        <td class="p-2 text-center">{{ plant.humidity }}</td>
+                        <td class="p-2 text-center">{{ plant.N }}</td>
+                        <td class="p-2 text-center">{{ plant.P }}</td>
+                        <td class="p-2 text-center">{{ plant.K }}</td>
+                        <td class="p-2 text-center">{{ plant.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td class="p-2 text-center">
+                            <a href="{{ url_for('update_plant', plant_id=plant.plant_id) }}" class="text-blue-500 hover:text-blue-700">Update</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="p-2 text-center text-gray-500">No plants registered yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Daily Updates Section -->
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-bold text-gray-700 mb-4">Daily Updates</h2>
+            {% for plant in plants %}
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">Plant: {{ plant.plant_name }} (ID: {{ plant.plant_id }})</h3>
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="p-2">Date</th>
+                            <th class="p-2">Temperature (°C)</th>
+                            <th class="p-2">Humidity (%)</th>
+                            <th class="p-2">N</th>
+                            <th class="p-2">P</th>
+                            <th class="p-2">K</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for update in plant_updates[plant.plant_id] %}
+                        <tr class="border-b">
+                            <td class="p-2 text-center">{{ update.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td class="p-2 text-center">{{ update.temperature }}</td>
+                            <td class="p-2 text-center">{{ update.humidity }}</td>
+                            <td class="p-2 text-center">{{ update.N }}</td>
+                            <td class="p-2 text-center">{{ update.P }}</td>
+                            <td class="p-2 text-center">{{ update.K }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="p-2 text-center text-gray-500">No updates available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- JavaScript for Dynamic Graphs -->
+    <script>
+        // Initialize NPK Chart
+        const npkCtx = document.getElementById('npkChart').getContext('2d');
+        const npkChart = new Chart(npkCtx, {
+            type: 'line',
+            data: {
+                labels: [], // Timestamps
+                datasets: [
+                    {
+                        label: 'Nitrogen (N)',
+                        data: [],
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        fill: false
+                    },
+                    {
+                        label: 'Phosphorus (P)',
+                        data: [],
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        fill: false
+                    },
+                    {
+                        label: 'Potassium (K)',
+                        data: [],
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Value'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Initialize Temperature & Humidity Chart
+        const tempHumidityCtx = document.getElementById('tempHumidityChart').getContext('2d');
+        const tempHumidityChart = new Chart(tempHumidityCtx, {
+            type: 'line',
+            data: {
+                labels: [], // Timestamps
+                datasets: [
+                    {
+                        label: 'Temperature (°C)',
+                        data: [],
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        fill: false
+                    },
+                    {
+                        label: 'Humidity (%)',
+                        data: [],
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Value'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Function to update graphs with plant data
+        function updateGraphs(plantId) {
+            // Fetch updates for the selected plant
+            fetch(`/get-updates/${plantId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Clear existing data
+                    npkChart.data.labels = [];
+                    npkChart.data.datasets[0].data = [];
+                    npkChart.data.datasets[1].data = [];
+                    npkChart.data.datasets[2].data = [];
+
+                    tempHumidityChart.data.labels = [];
+                    tempHumidityChart.data.datasets[0].data = [];
+                    tempHumidityChart.data.datasets[1].data = [];
+
+                    // Populate graphs with new data
+                    data.forEach(update => {
+                        const timestamp = new Date(update.timestamp).toLocaleTimeString();
+
+                        // Update NPK Chart
+                        npkChart.data.labels.push(timestamp);
+                        npkChart.data.datasets[0].data.push(update.N);
+                        npkChart.data.datasets[1].data.push(update.P);
+                        npkChart.data.datasets[2].data.push(update.K);
+
+                        // Update Temperature & Humidity Chart
+                        tempHumidityChart.data.labels.push(timestamp);
+                        tempHumidityChart.data.datasets[0].data.push(update.temperature);
+                        tempHumidityChart.data.datasets[1].data.push(update.humidity);
+                    });
+
+                    // Update the charts
+                    npkChart.update();
+                    tempHumidityChart.update();
+                })
+                .catch(error => console.error('Error fetching updates:', error));
+        }
+
+        // Event listener for plant selection
+        document.getElementById('plantSelect').addEventListener('change', function() {
+            const plantId = this.value;
+            if (plantId) {
+                updateGraphs(plantId);
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Disease Detection</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        h1 { color: green; }
+        img { max-width: 300px; margin-top: 20px; }
+        .container { max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Plant Disease Detection</h1>
+        
+        <form action="/disease-detection" method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" accept="image/*" required>
+            <button type="submit">Upload & Predict</button>
+        </form>
+
+        {% if uploaded_image %}
+            <h2>Uploaded Image:</h2>
+            <img src="{{ uploaded_image }}" alt="Uploaded Image">
+            
+            <h2>Prediction:</h2>
+            <p><strong>{{ prediction }}</strong></p>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Plant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-green-100 flex justify-center items-center min-h-screen p-5">
+
+    <div class="w-full max-w-4xl">
+        <h1 class="text-3xl font-bold text-gray-700 mb-8">Update Plant: {{ plant.plant_name }}</h1>
+
+        <!-- Update Form -->
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+            <form method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-gray-600">Temperature (°C):</label>
+                    <input type="number" id="temperature" name="temperature" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-green-400" required>
+                </div>
+                <div>
+                    <label class="block text-gray-600">Humidity (%):</label>
+                    <input type="number" id="humidity" name="humidity" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-green-400" required>
+                </div>
+                <div>
+                    <label class="block text-gray-600">Nitrogen (N):</label>
+                    <input type="number" id="N" name="N" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-green-400" required>
+                </div>
+                <div>
+                    <label class="block text-gray-600">Phosphorus (P):</label>
+                    <input type="number" id="P" name="P" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-green-400" required>
+                </div>
+                <div>
+                    <label class="block text-gray-600">Potassium (K):</label>
+                    <input type="number" id="K" name="K" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-green-400" required>
+                </div>
+                <button type="submit" class="w-full bg-green-500 text-white p-2 rounded-md hover:bg-green-600 transition">
+                    Submit Update
+                </button>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
