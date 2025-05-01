@@ -9,7 +9,7 @@ git clone https://github.com/vishnupriya1863/AgriPulse.git
 
 Python : 3.11 version 
 
-Install Dependencies: Follow the instructions in the requirements.txt file to install necessary packages.
+Install Dependencies:requirements.txt file to install necessary packages.
 
 Configure Sensors: Set up IoT sensors and ensure they are connected via the ESP8266 module.
 
